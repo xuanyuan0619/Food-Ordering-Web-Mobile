@@ -1,0 +1,54 @@
+@model List<Order>
+@{ ViewData["Title"] = "Kitchen Queue"; }
+
+<h2 class="mb-3">Kitchen Order Queue</h2>
+
+<div class="row row-cols-1 row-cols-md-3 g-3">
+    @foreach (var order in Model)
+    {
+        <div class="col">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between">
+                    <span>Order #@order.OrderId (Table @order.Table?.TableNumber)</span>
+                    <span class="badge bg-warning text-dark">@order.Status</span>
+                </div>
+                <ul class="list-group list-group-flush">
+                    @foreach (var item in order.OrderItems)
+                    {
+                        <li class="list-group-item">
+                            @item.MenuItem?.ItemName x @item.Quantity
+                            @if (!string.IsNullOrEmpty(item.SpecialInstructions))
+                            {
+                                <div class="text-muted small">Note: @item.SpecialInstructions</div>
+                            }
+                        </li>
+                    }
+                </ul>
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(order.StaffNote))
+                    {
+                        <div class="alert alert-secondary py-1 px-2 small mb-2">Note: @order.StaffNote</div>
+                    }
+                    <form asp-action="UpdateStatus" method="post">
+                        <input type="hidden" name="orderId" value="@order.OrderId" />
+                        <div class="d-flex gap-2 mb-2">
+                            <select name="status" class="form-select form-select-sm">
+                                @foreach (var status in Enum.GetValues<OrderStatus>())
+                                {
+                                    <option value="@status" selected="@(status == order.Status)">@status</option>
+                                }
+                            </select>
+                            <button type="submit" class="btn btn-sm btn-primary">Update</button>
+                        </div>
+                        <textarea name="staffNote" class="form-control form-control-sm" rows="2" placeholder="Add a kitchen note (e.g. running late, out of stock)...">@order.StaffNote</textarea>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@if (!Model.Any())
+{
+    <p>No active orders right now.</p>
+}

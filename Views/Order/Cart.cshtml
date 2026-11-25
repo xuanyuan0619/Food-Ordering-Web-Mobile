@@ -1,0 +1,51 @@
+@model List<CartItemViewModel>
+@{ ViewData["Title"] = "Cart"; }
+
+<h2 class="mb-3">Your Cart</h2>
+
+@if (!Model.Any())
+{
+    <p>Your cart is empty. <a asp-controller="Menu" asp-action="Index">Browse the menu</a>.</p>
+}
+else
+{
+    <table class="table align-middle">
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Unit Price</th>
+                <th>Quantity</th>
+                <th>Subtotal</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.ItemName</td>
+                    <td>RM @item.UnitPrice.ToString("0.00")</td>
+                    <td style="width:140px">
+                        <form asp-action="UpdateQuantity" method="post" class="d-flex gap-2">
+                            <input type="hidden" name="menuItemId" value="@item.MenuItemId" />
+                            <input type="number" name="quantity" value="@item.Quantity" min="0" class="form-control form-control-sm" />
+                            <button type="submit" class="btn btn-sm btn-outline-primary">Update</button>
+                        </form>
+                    </td>
+                    <td>RM @item.Subtotal.ToString("0.00")</td>
+                    <td>
+                        <form asp-action="RemoveFromCart" method="post">
+                            <input type="hidden" name="menuItemId" value="@item.MenuItemId" />
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="text-end">
+        <h4>Total: RM @Model.Sum(i => i.Subtotal).ToString("0.00")</h4>
+        <a asp-action="Checkout" class="btn btn-success">Proceed to Checkout</a>
+    </div>
+}

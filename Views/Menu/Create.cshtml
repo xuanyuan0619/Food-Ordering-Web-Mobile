@@ -1,0 +1,54 @@
+@model MenuItemViewModel
+@{ ViewData["Title"] = "Add Menu Item"; }
+
+<h2 class="mb-3">Add Menu Item</h2>
+
+<form asp-action="Create" method="post" enctype="multipart/form-data" class="col-md-6">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="mb-3">
+        <label asp-for="ItemName" class="form-label"></label>
+        <input asp-for="ItemName" class="form-control" />
+        <span asp-validation-for="ItemName" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Description" class="form-label"></label>
+        <textarea asp-for="Description" class="form-control"></textarea>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Price" class="form-label"></label>
+        <input asp-for="Price" class="form-control" />
+        <span asp-validation-for="Price" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="CategoryName" class="form-label">Category</label>
+        <input asp-for="CategoryName" class="form-control" list="categorySuggestions" placeholder="Type a new or existing category" />
+        <datalist id="categorySuggestions">
+            @foreach (var cat in (List<Category>)(ViewBag.ExistingCategories ?? new List<Category>()))
+            {
+                <option value="@cat.CategoryName"></option>
+            }
+        </datalist>
+        <span asp-validation-for="CategoryName" class="text-danger"></span>
+        <div class="form-text">Type any category name. If it doesn't exist yet, it'll be created automatically.</div>
+    </div>
+    <div class="mb-3">
+        <label asp-for="ImageFiles" class="form-label">Photos (you can select multiple)</label>
+        <input asp-for="ImageFiles" type="file" class="form-control" accept="image/*" multiple />
+    </div>
+    <div class="form-check mb-2">
+        <input asp-for="IsAvailable" class="form-check-input" />
+        <label asp-for="IsAvailable" class="form-check-label"></label>
+    </div>
+    <div class="form-check mb-3">
+        <input asp-for="IsSignatureDish" class="form-check-input" />
+        <label asp-for="IsSignatureDish" class="form-check-label"></label>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a asp-action="Manage" class="btn btn-outline-secondary">Cancel</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

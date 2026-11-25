@@ -1,0 +1,89 @@
+@model MenuItemViewModel
+@{
+    ViewData["Title"] = "Edit Menu Item";
+}
+
+<h2 class="mb-3">Edit Menu Item</h2>
+
+<form asp-action="Edit" asp-route-id="@Model.MenuItemId" method="post" enctype="multipart/form-data" class="col-md-6">
+    <input type="hidden" asp-for="MenuItemId" />
+    <div asp-validation-summary="All" class="text-danger"></div>
+
+    <div class="mb-3">
+        <label asp-for="ItemName" class="form-label"></label>
+        <input asp-for="ItemName" class="form-control" />
+        <span asp-validation-for="ItemName" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Description" class="form-label"></label>
+        <textarea asp-for="Description" class="form-control"></textarea>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Price" class="form-label"></label>
+        <input asp-for="Price" class="form-control" />
+        <span asp-validation-for="Price" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="CategoryName" class="form-label">Category</label>
+        <input asp-for="CategoryName" class="form-control" list="categorySuggestions" placeholder="Type a new or existing category" />
+        <datalist id="categorySuggestions">
+            @foreach (var cat in (List<Category>)(ViewBag.ExistingCategories ?? new List<Category>()))
+            {
+                <option value="@cat.CategoryName"></option>
+            }
+        </datalist>
+        <span asp-validation-for="CategoryName" class="text-danger"></span>
+        <div class="form-text">Type any category name. If it doesn't exist yet, it'll be created automatically.</div>
+    </div>
+
+    @if (Model.ExistingImages.Any())
+    {
+        <div class="mb-3">
+            <label class="form-label">Current Photos</label>
+            <div class="d-flex gap-2 flex-wrap">
+                @foreach (var img in Model.ExistingImages)
+                {
+                    <div class="position-relative">
+                        <img src="@img.ImagePath" style="width:90px;height:90px;object-fit:cover" class="rounded border" />
+                        <button type="submit"
+                                form="deleteImageForm-@img.MenuItemImageId"
+                                class="btn btn-sm btn-danger py-0 px-1 position-absolute top-0 end-0"
+                                onclick="return confirm('Remove this photo?');">
+                            &times;
+                        </button>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    <div class="mb-3">
+        <label asp-for="ImageFiles" class="form-label">Add More Photos</label>
+        <input asp-for="ImageFiles" type="file" class="form-control" accept="image/*" multiple />
+    </div>
+    <div class="form-check mb-2">
+        <input asp-for="IsAvailable" class="form-check-input" />
+        <label asp-for="IsAvailable" class="form-check-label"></label>
+    </div>
+    <div class="form-check mb-3">
+        <input asp-for="IsSignatureDish" class="form-check-input" />
+        <label asp-for="IsSignatureDish" class="form-check-label"></label>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save Changes</button>
+    <a asp-action="Manage" class="btn btn-outline-secondary">Cancel</a>
+</form>
+
+@* Delete-image forms live OUTSIDE the main Edit form to avoid nested <form> elements,
+   which browsers auto-close and which silently breaks the Save Changes button. *@
+@foreach (var img in Model.ExistingImages)
+{
+    <form id="deleteImageForm-@img.MenuItemImageId" asp-action="DeleteImage" method="post" class="d-none">
+        <input type="hidden" name="imageId" value="@img.MenuItemImageId" />
+        <input type="hidden" name="menuItemId" value="@Model.MenuItemId" />
+    </form>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

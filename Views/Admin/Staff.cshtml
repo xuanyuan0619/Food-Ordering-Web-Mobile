@@ -1,0 +1,62 @@
+@model List<User>
+@{ ViewData["Title"] = "Staff Accounts"; }
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Staff &amp; Admin Accounts</h2>
+    <a asp-action="CreateStaff" class="btn btn-primary">+ Add Staff</a>
+</div>
+
+<table class="table align-middle">
+    <thead>
+        <tr>
+            <th>Username</th>
+            <th>Full Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@user.Username</td>
+                <td>@user.FullName</td>
+                <td>@user.Email</td>
+                <td><span class="badge bg-secondary">@user.Role</span></td>
+                <td>
+                    @if (user.IsLockedOut)
+                    {
+                        <span class="badge bg-danger">Locked</span>
+                    }
+                    else if (user.IsActive)
+                    {
+                        <span class="badge bg-success">Active</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">Inactive</span>
+                    }
+                </td>
+                <td class="d-flex gap-2">
+                    <form asp-action="ToggleActive" asp-route-id="@user.UserId" method="post">
+                        <button type="submit" class="btn btn-sm btn-outline-primary">
+                            @(user.IsActive ? "Deactivate" : "Activate")
+                        </button>
+                    </form>
+                    @if (user.IsLockedOut)
+                    {
+                        <form asp-action="Unlock" asp-route-id="@user.UserId" method="post">
+                            <button type="submit" class="btn btn-sm btn-outline-warning">Unlock</button>
+                        </form>
+                    }
+                    <form asp-action="DeleteStaff" asp-route-id="@user.UserId" method="post"
+                          onsubmit="return confirm('Delete this account? This cannot be undone.');">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

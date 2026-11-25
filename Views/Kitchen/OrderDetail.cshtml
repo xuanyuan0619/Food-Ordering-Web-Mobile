@@ -1,0 +1,70 @@
+@model Order
+@{ ViewData["Title"] = "Order Detail"; }
+
+<h2 class="mb-3">Order #@Model.OrderId</h2>
+
+<div class="row">
+    <div class="col-md-7">
+        <table class="table">
+            <thead>
+                <tr><th>Item</th><th>Qty</th><th>Unit Price</th><th>Subtotal</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.OrderItems)
+                {
+                    <tr>
+                        <td>
+                            @item.MenuItem?.ItemName
+                            @if (!string.IsNullOrEmpty(item.SpecialInstructions))
+                            {
+                                <div class="text-muted small">Note: @item.SpecialInstructions</div>
+                            }
+                        </td>
+                        <td>@item.Quantity</td>
+                        <td>RM @item.UnitPrice.ToString("0.00")</td>
+                        <td>RM @item.Subtotal.ToString("0.00")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        @if (!string.IsNullOrEmpty(Model.Remarks))
+        {
+            <p><strong>Remarks:</strong> @Model.Remarks</p>
+        }
+    </div>
+
+    <div class="col-md-5">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Order Summary</h5>
+                <p class="mb-1"><strong>Customer:</strong> @Model.Customer?.FullName (@Model.Customer?.Username)</p>
+                <p class="mb-1"><strong>Table:</strong> @Model.Table?.TableNumber</p>
+                <p class="mb-1"><strong>Order Date:</strong> @Model.OrderDate.ToString("dd MMM yyyy, HH:mm")</p>
+                <hr />
+                <p class="mb-1 d-flex justify-content-between"><span>Subtotal</span><span>RM @Model.SubtotalAmount.ToString("0.00")</span></p>
+                @if (Model.DiscountAmount > 0)
+                {
+                    <p class="mb-1 d-flex justify-content-between text-success">
+                        <span>
+                            Discount
+                            @if (!string.IsNullOrEmpty(Model.VoucherCodeUsed)) { <text> (@Model.VoucherCodeUsed)</text> }
+                            @if (Model.PointsRedeemed > 0) { <text> (@Model.PointsRedeemed pts)</text> }
+                        </span>
+                        <span>- RM @Model.DiscountAmount.ToString("0.00")</span>
+                    </p>
+                }
+                <p class="mb-1 d-flex justify-content-between fw-bold"><span>Total</span><span>RM @Model.TotalAmount.ToString("0.00")</span></p>
+                <hr />
+                <p class="mb-1"><strong>Payment Method:</strong> @Model.PaymentMethod</p>
+                <p class="mb-1"><strong>Payment Status:</strong> @Model.PaymentStatus</p>
+                <p class="mb-1"><strong>Order Status:</strong> <span class="badge bg-info text-dark">@Model.Status</span></p>
+                @if (Model.PointsEarned > 0)
+                {
+                    <p class="mb-1"><strong>Points Awarded:</strong> +@Model.PointsEarned</p>
+                }
+            </div>
+        </div>
+
+        <a asp-action="Report" class="btn btn-outline-secondary w-100 mt-3">Back to Report</a>
+    </div>
+</div>

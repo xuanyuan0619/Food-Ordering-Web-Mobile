@@ -1,0 +1,64 @@
+@model List<Order>
+@{
+    ViewData["Title"] = "Order Report";
+    var topSelling = (List<TopSellingItem>)ViewBag.TopSelling;
+}
+
+<h2 class="mb-3">Order Report</h2>
+
+<form method="get" class="row g-2 mb-4">
+    <div class="col-auto">
+        <input type="date" name="from" class="form-control" value="@(ViewBag.From as DateTime? != null ? ((DateTime)ViewBag.From).ToString("yyyy-MM-dd") : "")" />
+    </div>
+    <div class="col-auto">
+        <input type="date" name="to" class="form-control" value="@(ViewBag.To as DateTime? != null ? ((DateTime)ViewBag.To).ToString("yyyy-MM-dd") : "")" />
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-primary">Filter</button>
+    </div>
+</form>
+
+<p class="fw-bold">Total Revenue (Completed Orders): RM @(((decimal)ViewBag.TotalRevenue).ToString("0.00"))</p>
+
+@if (topSelling.Any())
+{
+    <h5 class="mt-4">Top Selling Items</h5>
+    <table class="table table-sm">
+        <thead>
+            <tr><th>#</th><th>Item</th><th>Qty Sold</th><th>Revenue</th></tr>
+        </thead>
+        <tbody>
+            @{ int rank = 1; }
+            @foreach (var item in topSelling)
+            {
+                <tr>
+                    <td>@rank</td>
+                    <td>@item.ItemName</td>
+                    <td>@item.QuantitySold</td>
+                    <td>RM @item.Revenue.ToString("0.00")</td>
+                </tr>
+                rank++;
+            }
+        </tbody>
+    </table>
+}
+
+<h5 class="mt-4">Orders</h5>
+<table class="table">
+    <thead>
+        <tr><th>Order #</th><th>Date</th><th>Items</th><th>Total</th><th>Status</th><th></th></tr>
+    </thead>
+    <tbody>
+        @foreach (var order in Model)
+        {
+            <tr>
+                <td>@order.OrderId</td>
+                <td>@order.OrderDate.ToString("dd MMM yyyy, HH:mm")</td>
+                <td>@order.OrderItems.Sum(i => i.Quantity)</td>
+                <td>RM @order.TotalAmount.ToString("0.00")</td>
+                <td>@order.Status</td>
+                <td><a asp-action="OrderDetail" asp-route-id="@order.OrderId" class="btn btn-sm btn-outline-primary">Details</a></td>
+            </tr>
+        }
+    </tbody>
+</table>

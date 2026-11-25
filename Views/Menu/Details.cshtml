@@ -1,0 +1,98 @@
+@model MenuItem
+@{
+    ViewData["Title"] = Model.ItemName;
+    double? avgRating = ViewBag.AverageRating as double?;
+    int reviewCount = (int)ViewBag.ReviewCount;
+    var images = Model.Images.OrderBy(i => i.DisplayOrder).ToList();
+}
+
+<a asp-action="Index" class="btn btn-sm btn-outline-secondary mb-3">&larr; Back to Menu</a>
+
+<div class="row">
+    <div class="col-md-6">
+        @if (images.Any())
+        {
+            <div id="photoCarousel" class="carousel slide mb-2" data-bs-ride="carousel">
+                <div class="carousel-inner rounded border">
+                    @for (int i = 0; i < images.Count; i++)
+                    {
+                        <div class="carousel-item @(i == 0 ? "active" : "")">
+                            <img src="@images[i].ImagePath" class="d-block w-100" style="height:380px;object-fit:cover" alt="@Model.ItemName" />
+                        </div>
+                    }
+                </div>
+                @if (images.Count > 1)
+                {
+                    <button class="carousel-control-prev" type="button" data-bs-target="#photoCarousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon"></span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#photoCarousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon"></span>
+                    </button>
+                }
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+                @foreach (var img in images)
+                {
+                    <img src="@img.ImagePath" style="width:70px;height:70px;object-fit:cover" class="rounded border" />
+                }
+            </div>
+        }
+        else if (!string.IsNullOrEmpty(Model.ImagePath))
+        {
+            <img src="@Model.ImagePath" class="img-fluid rounded border" alt="@Model.ItemName" />
+        }
+        else
+        {
+            <div class="bg-light border rounded d-flex align-items-center justify-content-center" style="height:380px">
+                <span class="text-muted">No photo available</span>
+            </div>
+        }
+    </div>
+
+    <div class="col-md-6">
+        <h2>
+            @Model.ItemName
+            @if (Model.IsSignatureDish)
+            {
+                <span class="badge bg-warning text-dark">Signature</span>
+            }
+        </h2>
+        <p class="text-muted">@Model.Category?.CategoryName</p>
+
+        @if (avgRating.HasValue)
+        {
+            <p>
+                @for (int s = 1; s <= 5; s++)
+                {
+                    <span class="text-warning">@(s <= Math.Round(avgRating.Value) ? "★" : "☆")</span>
+                }
+                <span class="text-muted">(@avgRating.Value.ToString("0.0") from @reviewCount review@(reviewCount == 1 ? "" : "s"))</span>
+            </p>
+        }
+        else
+        {
+            <p class="text-muted">No reviews yet</p>
+        }
+
+        <p class="fs-4 fw-bold">RM @Model.Price.ToString("0.00")</p>
+        <p>@Model.Description</p>
+
+        @if (!Model.IsAvailable)
+        {
+            <div class="alert alert-secondary">Currently unavailable</div>
+        }
+        else if (User.IsInRole("Customer"))
+        {
+            <form asp-controller="Order" asp-action="AddToCart" method="post" class="d-flex gap-2 mt-3">
+                <input type="hidden" name="menuItemId" value="@Model.MenuItemId" />
+                <input type="number" name="quantity" value="1" min="1" class="form-control" style="width:100px" />
+                <button type="submit" class="btn btn-success flex-grow-1">Add to Cart</button>
+            </form>
+            <form asp-controller="Wishlist" asp-action="Add" method="post" class="mt-2">
+                <input type="hidden" name="menuItemId" value="@Model.MenuItemId" />
+                <button type="submit" class="btn btn-outline-danger w-100">&hearts; Save to Wishlist</button>
+            </form>
+        }
+    </div>
+</div>

@@ -1,0 +1,40 @@
+@model LoginViewModel
+@{ ViewData["Title"] = "Login"; }
+
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <h2 class="mb-3">Login</h2>
+        <form asp-action="Login" method="post">
+            <input type="hidden" asp-for="@ViewData["ReturnUrl"]" />
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="mb-3">
+                <label asp-for="Username" class="form-label"></label>
+                <input asp-for="Username" class="form-control" autofocus />
+                <span asp-validation-for="Username" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Password" class="form-label"></label>
+                <input asp-for="Password" class="form-control" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+            <div class="form-check mb-3">
+                <input asp-for="RememberMe" class="form-check-input" />
+                <label asp-for="RememberMe" class="form-check-label"></label>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Login</button>
+        </form>
+        <p class="mt-3">No account? <a asp-action="Register">Register here</a></p>
+
+        <div class="alert alert-secondary mt-4 small">
+            <strong>Demo accounts</strong><br />
+            Admin: admin / Admin@123<br />
+            Staff: staff1 / Staff@123<br />
+            Customer: customer1 / Cust@123
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

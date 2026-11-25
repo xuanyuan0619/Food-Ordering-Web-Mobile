@@ -1,0 +1,69 @@
+@model List<MenuItem>
+@{
+    var salesByItem = (Dictionary<int, int>)ViewBag.SalesByItem;
+    int page = (int)ViewBag.Page;
+    int totalPages = (int)ViewBag.TotalPages;
+}
+
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    @foreach (var item in Model)
+    {
+        int sold = salesByItem.GetValueOrDefault(item.MenuItemId, 0);
+        var coverImage = item.Images.OrderBy(i => i.DisplayOrder).FirstOrDefault()?.ImagePath ?? item.ImagePath;
+
+        <div class="col">
+            <div class="card h-100">
+                <a asp-controller="Menu" asp-action="Details" asp-route-id="@item.MenuItemId" class="text-decoration-none text-dark">
+                    @if (!string.IsNullOrEmpty(coverImage))
+                    {
+                        <img src="@coverImage" class="card-img-top" style="height:180px;object-fit:cover" alt="@item.ItemName" />
+                    }
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            @item.ItemName
+                            @if (item.IsSignatureDish)
+                            {
+                                <span class="badge bg-warning text-dark">Signature</span>
+                            }
+                            @if (sold > 0)
+                            {
+                                <span class="badge bg-danger">🔥 @sold sold</span>
+                            }
+                        </h5>
+                        <p class="card-text text-muted small">@item.Category?.CategoryName</p>
+                        <p class="fw-bold">RM @item.Price.ToString("0.00")</p>
+                    </div>
+                </a>
+                <div class="card-footer d-flex gap-2">
+                    <a asp-controller="Menu" asp-action="Details" asp-route-id="@item.MenuItemId" class="btn btn-sm btn-outline-primary flex-grow-1">View Details</a>
+                    @if (User.IsInRole("Customer"))
+                    {
+                        <form asp-controller="Wishlist" asp-action="Add" method="post">
+                            <input type="hidden" name="menuItemId" value="@item.MenuItemId" />
+                            <button type="submit" class="btn btn-sm btn-outline-danger">&hearts;</button>
+                        </form>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@if (!Model.Any())
+{
+    <p class="text-muted mt-3">No dishes match your search.</p>
+}
+
+@if (totalPages > 1)
+{
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+            @for (int p = 1; p <= totalPages; p++)
+            {
+                <li class="page-item @(p == page ? "active" : "")">
+                    <a class="page-link menu-page-link" href="#" data-page="@p">@p</a>
+                </li>
+            }
+        </ul>
+    </nav>
+}

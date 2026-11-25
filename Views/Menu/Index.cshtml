@@ -1,0 +1,73 @@
+@{ ViewData["Title"] = "Menu"; }
+
+<h2 class="mb-3">Our Menu</h2>
+
+<div class="row g-2 mb-3">
+    <div class="col-md-4">
+        <input type="text" id="searchBox" class="form-control" placeholder="Search dishes..." />
+    </div>
+    <div class="col-md-3">
+        <select id="categoryFilter" class="form-select">
+            <option value="">All Categories</option>
+            @foreach (var cat in (List<Category>)ViewBag.Categories)
+            {
+                <option value="@cat.CategoryId">@cat.CategoryName</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-3">
+        <select id="sortSelect" class="form-select">
+            <option value="top">Top Selling</option>
+            <option value="rating">Highest Rated</option>
+            <option value="price_asc">Price: Low to High</option>
+            <option value="price_desc">Price: High to Low</option>
+            <option value="name">Name (A-Z)</option>
+        </select>
+    </div>
+</div>
+
+<div id="menuGrid">
+    <p class="text-muted">Loading menu...</p>
+</div>
+
+@section Scripts {
+    <script>
+        let currentPage = 1;
+
+        function loadMenuGrid(page) {
+            currentPage = page || 1;
+            const search = document.getElementById('searchBox').value;
+            const categoryId = document.getElementById('categoryFilter').value;
+            const sort = document.getElementById('sortSelect').value;
+
+            const params = new URLSearchParams({ search: search, sort: sort, page: currentPage });
+            if (categoryId) params.append('categoryId', categoryId);
+
+            fetch('@Url.Action("GridPartial", "Menu")?' + params.toString())
+                .then(res => res.text())
+                .then(html => {
+                    document.getElementById('menuGrid').innerHTML = html;
+                    attachPageLinks();
+                });
+        }
+
+        function attachPageLinks() {
+            document.querySelectorAll('.menu-page-link').forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    loadMenuGrid(parseInt(this.dataset.page));
+                });
+            });
+        }
+
+        let searchTimeout;
+        document.getElementById('searchBox').addEventListener('input', function () {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => loadMenuGrid(1), 350); // debounce so it doesn't fire on every keystroke
+        });
+        document.getElementById('categoryFilter').addEventListener('change', () => loadMenuGrid(1));
+        document.getElementById('sortSelect').addEventListener('change', () => loadMenuGrid(1));
+
+        loadMenuGrid(1);
+    </script>
+}
